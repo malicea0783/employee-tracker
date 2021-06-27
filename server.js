@@ -31,6 +31,7 @@ const loadMenu = () => {
         message: "What would you like to do?",
         choices: [
           "View all employees",
+          "View all employees by dept",
           "Add new employee",
           "Update employee role",
           "View roles",
@@ -44,6 +45,9 @@ const loadMenu = () => {
     .then((answer) => {
       if (answer.menu === "View all employees") {
         readEmployees();
+      }
+      if (answer.menu === "View all employees by dept") {
+        viewByDepartment();
       }
       if (answer.menu === "Add new employee") {
         addEmployees();
@@ -84,6 +88,29 @@ const readEmployees = () => {
   loadMenu();
 };
 
+const viewByDepartment = () => {
+  inquirer
+      .prompt([
+          {
+              name: "department",
+              type: "list",
+              choices: departmentInfo,
+              message: 'Which department would you like to view?'
+          }
+      ])
+      .then((answer) => {
+          console.log(answer);
+          let queryString =
+              'SELECT employee.id, employee.first_name, employee.last_name, department.name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON department.id = role.department_id WHERE department.id = ?';
+          connection.query(queryString, answer.department, (err, res) => {
+              if (err) throw err;
+              console.table(res);
+              loadMenu();
+          }
+          );
+      })
+}
+
 const addEmployees = () => {
   inquirer
     .prompt([
@@ -110,7 +137,7 @@ const addEmployees = () => {
         console.log(roleInfo.indexOf(answer.role));
         connection.query(
           "INSERT INTO employee (first_name, last_name, role_id) VALUES(?, ?, ?)",
-          [answer.firstName, answer.lastName, roleInfo.indexOf(answer.role) + 1],
+          [answer.firstName, answer.lastName, answer.role],
           (err, res) => {
             if (err) throw err;
             console.log(`${res.affectedRows} Done!\n`);
@@ -138,15 +165,16 @@ const updateEmployeeRole = () => {
       ])
       .then((answer) => {
           connection.query(
-              // const newRole = answer.roleInfo,
-              `UPDATE employee SET role_id = ${roleInfo.indexOf(answer.role) + 1} WHERE employee.id = ${answer.employee[0]}`,
+              'UPDATE employee SET role_id = answer.role WHERE employee.role_id = answer.role_id',
               (err, res) => {
                   if (err) throw err;
                   console.log(`${res.affectedRows} Done!\n`);
               }
           );
           readEmployees();
+          
       });
+      
 };
 
 const addDepartment = () => {
@@ -172,9 +200,7 @@ const addDepartment = () => {
           console.log(`${res.affectedRows} Done!\n`);
         }
       );
-      
       readDepartments();
-      
     });
     
 };
@@ -201,10 +227,9 @@ const addRole = () => {
 
     ])
     .then((answer) => {
-      console.log(departmentInfo.indexOf(answer.depId) + 1);
       connection.query(
         "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
-        [answer.title, answer.salary, departmentInfo.indexOf(answer.depId) + 1],
+        [answer.title, answer.salary, answer.depId],
         (err, res) => {
           if (err) throw err;
           console.log(`${res.affectedRows} Done!\n`);
@@ -236,7 +261,7 @@ const loadDeptInfo = () => {
   connection.query("SELECT * FROM department", (err,res) => {
     if(err) throw err;
     res.forEach(index => {
-      departmentInfo.push(index.name)
+      departmentInfo.push({name: index.name, value: index.id})
     });
   })
 };
@@ -246,7 +271,7 @@ const loadRoleInfo = () => {
   connection.query("SELECT * FROM role", (err,res) => {
     if(err) throw err;
     res.forEach(index => {
-      roleInfo.push(index.title)
+      roleInfo.push({name: index.title, value: index.id})
     });
   })
 };
@@ -256,7 +281,7 @@ const loadEmployeeInfo = () => {
   connection.query("SELECT * FROM employee", (err, res) => {
       if (err) throw err;
       res.forEach(index => {
-          employeeInfo.push(`${index.id} ${index.first_name} ${index.last_name}`)
+          employeeInfo.push({name: index.first_name, value: index.role})
         
       });
   })
@@ -265,7 +290,6 @@ const loadEmployeeInfo = () => {
 const quit = () => {
     connection.end();
 }
-
 
 connection.connect((err) => {
   if (err) throw err;
