@@ -43,7 +43,7 @@ For additional information please contact me via GitHub at [https://github.com/m
 
 ## Acknowledgements
 
-Miguel Alicea: [https://github.com/vmichalecki](https://github.com/vmichalecki)
+Valerie Michalecki: [https://github.com/vmichalecki](https://github.com/vmichalecki)
 
 ## Screenshots
 
