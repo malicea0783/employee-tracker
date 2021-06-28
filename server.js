@@ -61,7 +61,7 @@ const loadMenu = () => {
         case "View employees by department":
             viewByDepartment();
             break;
-        case "Add employee":
+        case "Add new employee":
             addEmployee();
             break;
         case "Update employee role":
@@ -87,7 +87,7 @@ const loadMenu = () => {
             break;
         default:
             quit();
-    }
+    };
   });
 };
 
@@ -130,7 +130,7 @@ const viewByDepartment = () => {
       })
 }
 
-const addEmployees = () => {
+const addEmployee = () => {
   inquirer
     .prompt([
       {
