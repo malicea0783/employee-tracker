@@ -3,6 +3,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 require("console.table");
 require('dotenv').config();
+var figlet = require('figlet');
 
 // Connection to MySQL database
 const connection = mysql.createConnection({
@@ -16,6 +17,15 @@ const connection = mysql.createConnection({
 let departmentInfo = [];
 let roleInfo = [];
 let employeeInfo = [];
+
+figlet('Employee Tracker', function(err, data) {
+  if (err) {
+      console.log('Something went wrong...');
+      console.dir(err);
+      return;
+  }
+  console.log(data)
+});
 
 const loadMenu = () => {
   
@@ -31,9 +41,10 @@ const loadMenu = () => {
         message: "What would you like to do?",
         choices: [
           "View all employees",
-          "View all employees by dept",
+          "View employees by department",
           "Add new employee",
           "Update employee role",
+          "Delete employee",
           "View roles",
           "Add role",
           "View departments",
@@ -43,34 +54,41 @@ const loadMenu = () => {
       },
     ])
     .then((answer) => {
-      if (answer.menu === "View all employees") {
-        readEmployees();
-      }
-      if (answer.menu === "View all employees by dept") {
-        viewByDepartment();
-      }
-      if (answer.menu === "Add new employee") {
-        addEmployees();
-      }
-      if (answer.menu === "Update employee role") {
-        updateEmployeeRole();
-      }
-      if (answer.menu === "View roles") {
-        readRoles();
-      }
-      if (answer.menu === "Add role") {
-        addRole();
-      }
-      if (answer.menu === "View departments") {
-        readDepartments();
-      }
-      if (answer.menu === "Add department") {
-        addDepartment();
-      }
-      if (answer.menu === "QUIT") {
-        quit();
-      }
-    });
+      switch (answer.menu) {
+        case "View all employees":
+            readEmployees();
+            break;
+        case "View employees by department":
+            viewByDepartment();
+            break;
+        case "Add employee":
+            addEmployee();
+            break;
+        case "Update employee role":
+            updateEmployeeRole();
+            break;
+        case "Delete employee":
+            deleteEmployee();
+            break;
+        case "View roles":
+            readRoles();
+            break;
+        case "Add role":
+            addRole();
+            break;
+        case "View departments":
+            readDepartments();
+            break;
+        case "Add department":
+            addDepartment();
+            break;
+        case "QUIT":
+            quit();
+            break;
+        default:
+            quit();
+    }
+  });
 };
 
 const readEmployees = () => {
@@ -84,8 +102,9 @@ const readEmployees = () => {
   connection.query(queryString, (err, res) => {
     if (err) throw err;
     console.table(res);
+    loadMenu();
   });
-  loadMenu();
+  
 };
 
 const viewByDepartment = () => {
@@ -164,11 +183,14 @@ const updateEmployeeRole = () => {
           }
       ])
       .then((answer) => {
+        console.log(answer.role);
+        console.log(answer.employee);
           connection.query(
-              'UPDATE employee SET role_id = answer.role WHERE employee.role_id = answer.role_id',
+            `UPDATE employee SET role_id = ${answer.role} WHERE id = ${answer.employee[0]}`,
               (err, res) => {
                   if (err) throw err;
                   console.log(`${res.affectedRows} Done!\n`);
+                  
               }
           );
           readEmployees();
@@ -176,6 +198,27 @@ const updateEmployeeRole = () => {
       });
       
 };
+
+const deleteEmployee = () => {
+  inquirer
+      .prompt([
+          {
+              name: "employee",
+              type: "list",
+              choices: employeeInfo,
+              message: "Which employee would you like to delete?"
+          }
+      ])
+      .then((answer) => {
+          connection.query(`DELETE FROM employee WHERE id = ${answer.employee[0]}`,
+              (err, res) => {
+                  if (err) throw err;
+                  console.log(`${res.affectedRows} Done!\n`);
+              }
+          );
+          readEmployees();
+      });
+}
 
 const addDepartment = () => {
   inquirer
@@ -244,16 +287,18 @@ const readRoles = () => {
     if (err) throw err;
     // console.log(res)
     console.table(res);
+    loadMenu();
   });
-  loadMenu();
+  
 };
 
 const readDepartments = () => {
   connection.query("SELECT * FROM department", (err, res) => {
     if (err) throw err;
     console.table(res);
+    loadMenu();
   });
-  loadMenu();
+  
 };
 
 const loadDeptInfo = () => {
@@ -281,7 +326,7 @@ const loadEmployeeInfo = () => {
   connection.query("SELECT * FROM employee", (err, res) => {
       if (err) throw err;
       res.forEach(index => {
-          employeeInfo.push({name: index.first_name, value: index.role})
+        employeeInfo.push(`${index.id} ${index.first_name} ${index.last_name}`)
         
       });
   })
