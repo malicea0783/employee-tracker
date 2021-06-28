@@ -18,12 +18,14 @@ This command-line Content Management System is a solution for managing the datab
 ## Installation
 
 Follow these steps to install the Employee Tracker:
-    1. Create your database with the help of the `schema.sql` file.
-    2. Run `npm i` in your terminal to install all of the packages required.
-    3. Create a .env file and populate it:
-        * DB_NAME=employees_db
-        * DB_USER=root
-        * DB_PASSWORD='enter user password'
+
+1. Create your database with the help of the `schema.sql` file.
+2. Run `npm i` in your terminal to install all of the packages required.
+3. Create a .env file and populate it:
+
+* DB_NAME=employees_db
+* DB_USER=root
+* DB_PASSWORD='enter user password'
 
 ## Usage
 
