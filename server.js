@@ -4,6 +4,17 @@ const inquirer = require("inquirer");
 require("console.table");
 require('dotenv').config();
 var figlet = require('figlet');
+
+// ASCII art
+// figlet('Employee Tracker', function (err, data) {
+//     if (err) {
+//         console.log('Something went wrong...');
+//         console.dir(err);
+//         return;
+//     }
+//     console.log(data)
+// });
+
 // Connection to MySQL database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -16,15 +27,7 @@ const connection = mysql.createConnection({
 let departmentInfo = [];
 let roleInfo = [];
 let employeeInfo = [];
-// ASCII art
-figlet('Employee Tracker', function (err, data) {
-    if (err) {
-        console.log('Something went wrong...');
-        console.dir(err);
-        return;
-    }
-    console.log(data)
-});
+
 // Functions
 const loadMenu = () => {
     loadDeptInfo();
@@ -299,6 +302,7 @@ const addDepartment = () => {
 const quit = () => {
     connection.end();
 }
+
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected as id ${connection.threadId} `);
